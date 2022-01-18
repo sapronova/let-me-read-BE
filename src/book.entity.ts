@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
-import { BookStatus } from './book-store/book.model';
+import { BookStatus } from './book-store/book-status.enum';
 
 @Entity()
 export class Book {

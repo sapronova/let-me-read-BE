@@ -9,25 +9,22 @@ import {
   Query,
 } from '@nestjs/common';
 import { BookStoreService } from './book-store.service';
-import { Book, BookStatus } from './book.model';
+import { BookStatus } from './book-status.enum';
 import { AddBookDto } from './dto/create-book.dto';
 import { GetBookFilterDto } from './dto/get-books-filter.dto';
+import { Book } from 'src/book.entity';
 
 @Controller('book-store')
 export class BookStoreController {
   constructor(private bookStoreService: BookStoreService) {}
 
   @Get()
-  getBooks(@Query() filterDto: GetBookFilterDto): Book[] {
-    if (Object.keys(filterDto).length) {
-      return this.bookStoreService.getBooksWithFilters(filterDto);
-    } else {
-      return this.bookStoreService.getAllBooks();
-    }
+  getBooks(@Query() filterDto: GetBookFilterDto): Promise<Book[]> {
+    return this.bookStoreService.getBooks(filterDto);
   }
 
   @Get('/:id')
-  getBookById(@Param('id') id: string): Book {
+  getBookById(@Param('id') id: string): Promise<Book> {
     return this.bookStoreService.getBookById(id);
   }
 
@@ -37,7 +34,7 @@ export class BookStoreController {
   }
 
   @Delete('/:id')
-  deleteBookById(@Param('id') id: string): Book {
+  deleteBookById(@Param('id') id: string): Promise<void> {
     return this.bookStoreService.deleteBookById(id);
   }
 
@@ -45,7 +42,7 @@ export class BookStoreController {
   updateBookStatus(
     @Param('id') id: string,
     @Body('status') status: BookStatus,
-  ): Book {
+  ): Promise<Book> {
     return this.bookStoreService.updateBookStatus(id, status);
   }
 }

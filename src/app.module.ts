@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { BookStoreModule } from './book-store/book-store.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { BookStoreService } from './book-store/book-store.service';
 
 @Module({
   imports: [
@@ -17,6 +16,5 @@ import { BookStoreService } from './book-store/book-store.service';
       synchronize: true,
     }),
   ],
-  providers: [BookStoreService],
 })
 export class AppModule {}

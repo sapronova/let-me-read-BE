@@ -1,4 +1,4 @@
-import { BookStatus } from '../book.model';
+import { BookStatus } from '../book-status.enum';
 
 export class GetBookFilterDto {
   status?: BookStatus;

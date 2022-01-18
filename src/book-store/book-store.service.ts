@@ -1,65 +1,38 @@
-import { Injectable } from '@nestjs/common';
-import { v4 as uuid } from 'uuid';
-import { Book, BookStatus } from './book.model';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Book } from 'src/book.entity';
+import { BookStatus } from './book-status.enum';
+import { BooksRepository } from './books.repository';
 import { AddBookDto } from './dto/create-book.dto';
 import { GetBookFilterDto } from './dto/get-books-filter.dto';
 
 @Injectable()
 export class BookStoreService {
-  private books: Book[] = [];
+  constructor(
+    @InjectRepository(BooksRepository)
+    private booksRepository: BooksRepository,
+  ) {}
 
-  getAllBooks(): Book[] {
-    return this.books;
-  }
-
-  getBookById(id: string): Book {
-    return this.books.find((book) => book.id === id);
-  }
-
-  getBooksWithFilters(filterDto: GetBookFilterDto): Book[] {
-    const { status, search } = filterDto;
-    let books = this.getAllBooks();
-    if (status) {
-      books = books.filter((book) => book.status === status);
-      console.log(status);
+  async getBookById(id: string): Promise<Book> {
+    const bookById = await this.booksRepository.findOne(id);
+    if (!bookById) {
+      throw new NotFoundException(`Task with ID "${id}" is not found`);
     }
-    if (search) {
-      books = books.filter((book) => {
-        if (
-          book.title.toLowerCase().includes(search) ||
-          book.description.toLowerCase().includes(search) ||
-          book.author.toLowerCase().includes(search)
-        ) {
-          return true;
-        }
-        return false;
-      });
-    }
-    return books;
+    return bookById;
   }
 
-  deleteBookById(id: string): Book {
-    const deletedBook = this.books.find((book) => book.id === id);
-    this.books = this.books.filter((book) => book.id !== id);
-    return deletedBook;
+  async addNewBook(addBookDto: AddBookDto): Promise<Book> {
+    return this.booksRepository.addNewBook(addBookDto);
   }
 
-  updateBookStatus(id: string, status: BookStatus): Book {
-    const bookToBeUpdated = this.getBookById(id);
-    bookToBeUpdated.status = status;
-    return bookToBeUpdated;
+  async getBooks(filterDto: GetBookFilterDto): Promise<Book[]> {
+    return this.booksRepository.getBooks(filterDto);
   }
 
-  addNewBook(addBookDto: AddBookDto): Book {
-    const book: Book = {
-      id: uuid(),
-
-      status: BookStatus.UNREAD,
-      ...addBookDto,
-    };
-
-    this.books.push(book);
-
-    return book;
+  deleteBookById(id: string): Promise<void> {
+    return this.booksRepository.deleteBookById(id);
+  }
+  updateBookStatus(id: string, status: BookStatus): Promise<Book> {
+    return this.booksRepository.updateBookStatus(id, status);
   }
 }
